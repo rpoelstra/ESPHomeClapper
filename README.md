@@ -6,6 +6,7 @@ ESPHomeClapper uses a transient detection algorithm which requires exactly two t
 
 ## Installation
 
+### ESPHome
 Since ESPHomeClapper uses the microphone component, which is only supported on the ESP32 platform, ESPHomeClapper also only supports the ESP32 platform.
 
 Add the following to your YAML file to make use of ESPHomeClapper. Make sure to adapt the `i2s_audio` and `microphone` sections to your board. 
@@ -39,6 +40,10 @@ event:
     - platform: clapper
       name: My Clapper
 ```
+
+### Home Assistant
+
+In the automation editor in Home Assistant select 'Entity' as automation trigger and then select 'State'. Select your clapper as the entity. You can leave all other fields blank. 
 
 ## Configuration variables
 
