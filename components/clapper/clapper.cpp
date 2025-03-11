@@ -121,7 +121,7 @@ bool ClapperEvent::detect_clap(const std::vector<int16_t> &data) {
 
         //After finding an onset, make sure there is a fast enough decay (or timeout)
         if (this->onset_ != 0) {
-            //Update the transient_peak it it wasn't at the transient max yet
+            //Update the transient_peak if it wasn't at the transient max yet
             this->transient_peak_ = std::max(this->transient_peak_, this->envelope_);
 
             //Check for timeout
