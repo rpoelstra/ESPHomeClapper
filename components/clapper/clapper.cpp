@@ -131,7 +131,7 @@ bool ClapperEvent::detect_clap(const std::vector<int16_t> &data) {
             }
 
             //Check for decay
-            if (this->envelope_ < this->transient_peak_/this->transient_decay_threshold_factor_) {
+            if (this->envelope_ < this->transient_peak_*this->transient_decay_threshold_factor_) {
                 clap_detected = true;
                 this->onset_ = 0;
             }
