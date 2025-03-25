@@ -48,14 +48,19 @@ void ClapperEvent::data_callback(const std::vector<int16_t> &data) {
         switch (this->clapState_) {
             case ClapState::IDLE:
                 ESP_LOGI(TAG, "First clap detected!");
-                this->clapState_     = ClapState::FIRST_CLAP;
+                this->clapState_ = ClapState::FIRST_CLAP;
 //            M5.dis.drawpix(0, CRGB(255, 128, 0));
                 break;
             case ClapState::FIRST_CLAP:
-                ESP_LOGI(TAG, "Second clap detected!");
-                this->clapState_ = ClapState::SECOND_CLAP;
-//            M5.dis.drawpix(0, CRGB(0, 0, 255));
-                //We do not send event, but wait for not-a-third-clap
+                if ((current_time - this->last_clap_) < this->time_window_min_) {
+                    ESP_LOGI(TAG, "Second clap too early. Reset!");
+                    this->clapState_ = ClapState::IDLE;
+                } else {
+                    ESP_LOGI(TAG, "Second clap detected! %lu");
+                    this->clapState_ = ClapState::SECOND_CLAP;
+                    //            M5.dis.drawpix(0, CRGB(0, 0, 255));
+                    //We do not send event, but wait for not-a-third-clap
+                }
                 break;
             case ClapState::SECOND_CLAP:
                 ESP_LOGI(TAG, "Higher clap detected!");
@@ -66,7 +71,7 @@ void ClapperEvent::data_callback(const std::vector<int16_t> &data) {
                 //Nothing to be done
                 break;
         }
-    } else if (this->last_clap_ != 0 && (current_time - this->last_clap_) > this->time_window_) {
+    } else if (this->last_clap_ != 0 && (current_time - this->last_clap_) > this->time_window_max_) {
         //No clap for a while, check various timeouts
         switch (this->clapState_) {
             case ClapState::IDLE:

@@ -35,7 +35,8 @@ public:
     void set_transient_timeout(int timeout) { this->transient_timeout_ = timeout; }
     void set_transient_decay_threshold_factor(float factor) { this->transient_decay_threshold_factor_ = factor; }
 
-    void set_time_window(int window) { this->time_window_ = window; }
+    void set_time_window_min(int window) { this->time_window_min_ = window; }
+    void set_time_window_max(int window) { this->time_window_max_ = window; }
 
     void data_callback(const std::vector<int16_t> &data);
 
@@ -50,7 +51,8 @@ protected:
     unsigned long transient_timeout_;
     float transient_decay_threshold_factor_;
 
-    unsigned long time_window_;
+    unsigned long time_window_min_;
+    unsigned long time_window_max_;
 
     //Component state
     State state_ {State::START_MICROPHONE};

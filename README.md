@@ -53,7 +53,8 @@ In the automation editor in Home Assistant select 'Entity' as automation trigger
 - **onset_ratio_threshold** (_Optional_): Ratio between two consequtive samples that will be required for the onset to be marked as such. Defaults to 1.58.
 - **transient_timeout** (_Optional_): The maximum allowed time for the transient to last to be detected as a clap. Defaults to 100 ms.
 - **transient_decay_threshold_factor** (_Optional_): The minimum decay the transient such have in the timeout period to be detected as a clap. Defaults to 0.25.
-- **time_window** (_Optional_): The maximum time between claps to be considered a grouped event. Defaults to 800 ms.
+- **minimum_time_window** (_Optional_): The minimum time between claps for them to be considered a grouped event. Defaults to 250 ms.
+- **maximum_time_window** (_Optional_): The maximum time between claps for them to be considered a grouped event. Defaults to 500 ms.
 
 ## Full example
 

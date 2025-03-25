@@ -18,7 +18,8 @@ CONF_ONSET_RATIO_THRESHOLD = 'onset_ratio_threshold'
 CONF_TRANSIENT_TIMEOUT = 'transient_timeout'
 CONF_TRANSIENT_DECAY_THRESHOLD_FACTOR = 'transient_decay_threshold_factor'
 
-CONF_TIME_WINDOW = 'time_window'
+CONF_TIME_WINDOW_MIN = 'minimum_time_window'
+CONF_TIME_WINDOW_MAX = 'maximum_time_window'
 
 ClapperEvent = clapper_ns.class_("ClapperEvent", event.Event, cg.Component)
 
@@ -32,7 +33,8 @@ CONFIG_SCHEMA = event.event_schema(ClapperEvent).extend(
   cv.Optional(CONF_ONSET_RATIO_THRESHOLD, default=1.58): cv.float_range(min=1.0, min_included=False),
   cv.Optional(CONF_TRANSIENT_TIMEOUT, default="100ms"): cv.positive_time_period_milliseconds,
   cv.Optional(CONF_TRANSIENT_DECAY_THRESHOLD_FACTOR, default=0.25): cv.float_range(min=0.0, max=1.0, min_included=False, max_included=False),
-  cv.Optional(CONF_TIME_WINDOW, default="800ms"): cv.positive_time_period_milliseconds,
+  cv.Optional(CONF_TIME_WINDOW_MIN, default="250ms"): cv.positive_time_period_milliseconds,
+  cv.Optional(CONF_TIME_WINDOW_MAX, default="800ms"): cv.positive_time_period_milliseconds,
 }
 )
 
@@ -49,4 +51,5 @@ async def to_code(config):
     cg.add(var.set_onset_ratio_threshold(config[CONF_ONSET_RATIO_THRESHOLD]))
     cg.add(var.set_transient_timeout(config[CONF_TRANSIENT_TIMEOUT]))
     cg.add(var.set_transient_decay_threshold_factor(config[CONF_TRANSIENT_DECAY_THRESHOLD_FACTOR]))
-    cg.add(var.set_time_window(config[CONF_TIME_WINDOW]))
+    cg.add(var.set_time_window_min(config[CONF_TIME_WINDOW_MIN]))
+    cg.add(var.set_time_window_max(config[CONF_TIME_WINDOW_MAX]))
