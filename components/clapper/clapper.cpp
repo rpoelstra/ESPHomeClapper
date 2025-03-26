@@ -43,8 +43,6 @@ void ClapperEvent::data_callback(const std::vector<int16_t> &data) {
     //Detect double claps
     if (this->detect_clap(data)) {
         //A clap was detected
-        this->last_clap_ = current_time;
-
         switch (this->clapState_) {
             case ClapState::IDLE:
                 ESP_LOGI(TAG, "First clap detected!");
@@ -71,6 +69,8 @@ void ClapperEvent::data_callback(const std::vector<int16_t> &data) {
                 //Nothing to be done
                 break;
         }
+
+        this->last_clap_ = current_time;
     } else if (this->last_clap_ != 0 && (current_time - this->last_clap_) > this->time_window_max_) {
         //No clap for a while, check various timeouts
         switch (this->clapState_) {
