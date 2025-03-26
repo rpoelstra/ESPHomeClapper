@@ -56,7 +56,7 @@ void ClapperEvent::data_callback(const std::vector<int16_t> &data) {
                     ESP_LOGI(TAG, "Second clap too early. Reset!");
                     this->clapState_ = ClapState::IDLE;
                 } else {
-                    ESP_LOGI(TAG, "Second clap detected! %lu");
+                    ESP_LOGI(TAG, "Second clap detected!");
                     this->clapState_ = ClapState::SECOND_CLAP;
                     //            M5.dis.drawpix(0, CRGB(0, 0, 255));
                     //We do not send event, but wait for not-a-third-clap
