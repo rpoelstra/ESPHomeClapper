@@ -31,7 +31,7 @@ public:
     void set_dc_offset_factor(float factor) { this->dc_offset_factor_ = factor; }
     void set_envelope_decay_factor(float factor) { this->envelope_decay_factor_ = factor; }
     void set_onset_threshold(int16_t threshold) { this->onset_threshold_ = threshold; }
-    void set_onset_ratio_threshold(int16_t threshold) { this->onset_ratio_threshold_ = threshold; }
+    void set_onset_ratio_threshold(float threshold) { this->onset_ratio_threshold_ = threshold; }
     void set_transient_timeout(int timeout) { this->transient_timeout_ = timeout; }
     void set_transient_decay_threshold_factor(float factor) { this->transient_decay_threshold_factor_ = factor; }
 
@@ -47,7 +47,7 @@ protected:
     float dc_offset_factor_;
     float envelope_decay_factor_;
     int16_t onset_threshold_;
-    int16_t onset_ratio_threshold_;
+    float onset_ratio_threshold_;
     unsigned long transient_timeout_;
     float transient_decay_threshold_factor_;
 
