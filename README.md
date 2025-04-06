@@ -115,7 +115,7 @@ Make sure you have to following packages installed (probably inside a `venv`):
 
 You can add a small amount of code to your `microphone` configuration, which will send the received audio to an UDP server on your computer. You can then use this recording directly in the Python script.
 
-Add the following to your microphone section. Make sure to alter the IP address to match the address of your computer.
+Add the following to your microphone section. Make sure to alter the IP address to match the address of your computer. This piece of code is taken from: https://community.home-assistant.io/t/is-there-a-way-to-stream-audio-from-one-esphome-to-another/581786/15
 
 ```
 microphone:
