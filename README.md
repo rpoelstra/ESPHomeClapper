@@ -100,3 +100,101 @@ event:
     - platform: clapper
       name: My Clapper
 ```
+
+## Tweaking the configuration variables
+
+The configuration variables will likely need to be tweaked to get proper results for your scenario.
+In order to understand how the algorithm behaves in certain conditions, you can use the Python script from the `docs` folder.
+You can feed this script a recording from your ESPHome device and it will visualize where it detects claps and it will show the various thresholds which correspond to the various configuration variables.
+
+Make sure you have to following packages installed (probably inside a `venv`):
+- numpy
+- matplotlib
+
+### Obtaining a recording
+
+You can add a small amount of code to your `microphone` configuration, which will send the received audio to an UDP server on your computer. You can then use this recording directly in the Python script.
+
+Add the following to your microphone section. Make sure to alter the IP address to match the address of your computer.
+
+```
+microphone:
+    (...)
+    on_data:
+      - lambda: |-
+          static int sock = -1;
+
+          if (sock < 0) {
+            sock = ::socket(AF_INET, SOCK_DGRAM, 0);
+            if (sock >= 0) {
+              static const struct sockaddr_in destination = {
+                .sin_family = AF_INET,
+                .sin_port = htons(12345),
+                .sin_addr = { .s_addr = inet_addr("192.168.1.219") }
+              };
+              if (::connect(sock, reinterpret_cast<const struct sockaddr *>(&destination), sizeof(destination)) != 0) {
+                (void) ::close(sock);
+                sock = -1;
+              }
+            }
+          }
+
+          if (sock >= 0) {
+            static std::vector<int16_t> audio_buffer;
+
+            for (const auto sample : x) {
+              audio_buffer.push_back(sample);
+            }
+            if (audio_buffer.size() >= 256) {
+              (void) ::send(sock, audio_buffer.data(), audio_buffer.size() * sizeof(int16_t), 0);
+              audio_buffer.clear();
+            }
+          }
+```
+
+Start an UDP server on your computer using e.g. `nc -lu 12345 > test.raw` for macOS. For Linux or Windows there is probably a similar command available.
+
+You can inspect the recording using a program like Audacity, where you can perform a raw audio import. Configure the import for a 16000 hz samplerate, mono, 16-bit.
+
+### Analysing using the Python script
+
+Adjust the Python script in the `doc` folder, by adjusting the filename on line 5. Also make sure that you set all configuration variables to match your yaml file. 
+
+Running the script should result in the following plot:
+
+![Output plot of Python script](doc/img/DC-offset-removal.png)
+
+The top graph shows the input waveform and the graphs below that show various stages of the algorithm. We will explain these as we discuss the configuration parameters.
+
+#### dc_offset_factor
+
+Notice that the input signal various from about 1000 to 1500. This indicates that there is a significant DC offset present in the sginal. The first configuration parameter controls how fast this DC offset is removed. Notice that the second graph shows a decaying waveform from 0 s to about 1.5 s. The slope of this is control by the `dc_offset_factor`, where a larger number results in lighter slope.
+
+This second graph also shows the resulting waveform when the absolute value is taken. This is important for the next step, where the envelope is calculated.
+
+#### envelope_decay_factor
+
+The envelope_decay_factor controls how tight the envelope follows the absolute value waveform. This is best demonstrated using a short recording, where an individual clap can be seen:
+
+![Graph showing envelope_decay_factorEnvelope_decay_factor](Envelope-decay-factor.png)
+
+Notice the decaying waveform shortly after the onset in the third graph. The slope of this curve is controlled by the `envelope_decay_factor` where a higher number will decrease the slope and a lower number will increase the slope making it follow the waveform better, but will also introduce more spikes in the signal.
+
+#### onset_threshold
+
+The `onset_threshold` is also shown in the third graph with the horizontal dashed line. The amplitude of a transient needs to be above this line for an onset to be detected.
+
+#### onset_ratio_threshold
+
+From the envelope curve in graph three a ratio is caluclated by dividing the 'current' envelope amplitude by the previous envelope amplitude. This results in the signal in the bottom, fourth, graph. For an onset of a transient to be detected, this ratio needs to be above `onset_ratio_threshold`, which is indicated by the horizontal dashed line.
+
+#### transient_timeout and transient_decay_threshold_factor
+
+When an onset is detected a vertical dashed line is plotted, marked with 'onset', as can be seen in the image in section 'envelope_decay_factor'.
+A second vertical dashed line is plotted `transient_timeout` seconds later (and marked as such). The envelope must be below `transient_decay_threshold_factor` * max_envelope before the `transient_timeout` line, otherwise the transient is discarded. `max_amplitude` here is the maximum of the envelope between the 'onset' and 'transient_timeout' markers.
+
+If a clap is accepted, a solid vertical line is drawn marked with 'clap detected'. This can also be seen in the previous plot.
+
+#### minimum_timeout_window and maximum_timeout_window
+
+The minimum and maximum timeout window configuration parameters are not used by the Python script, as the script only shows detection of single claps. These configuration variables are used in determining whether a series of claps constitute a double clap. The claps need to be spaced at least `minimum_timeout_window` apart and no more than `maximum_timeout_window`. There must also not be a third (or higher) transient after the second clap.
