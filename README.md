@@ -176,7 +176,7 @@ This second graph also shows the resulting waveform when the absolute value is t
 
 The envelope_decay_factor controls how tight the envelope follows the absolute value waveform. This is best demonstrated using a short recording, where an individual clap can be seen:
 
-![Graph showing envelope_decay_factorEnvelope_decay_factor](Envelope-decay-factor.png)
+![Graph showing envelope_decay_factorEnvelope_decay_factor](doc/img/Envelope-decay-factor.png)
 
 Notice the decaying waveform shortly after the onset in the third graph. The slope of this curve is controlled by the `envelope_decay_factor` where a higher number will decrease the slope and a lower number will increase the slope making it follow the waveform better, but will also introduce more spikes in the signal.
 
