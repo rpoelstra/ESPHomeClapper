@@ -1,9 +1,12 @@
+from esphome import automation
 import esphome.codegen as cg
 from esphome.components import event, microphone
 import esphome.config_validation as cv
 from esphome.const import (
 CONF_ID,
 CONF_MICROPHONE,
+CONF_ON_STATE,
+CONF_TRIGGER_ID,
 )
 
 from . import clapper_ns
@@ -23,6 +26,12 @@ CONF_TIME_WINDOW_MAX = 'maximum_time_window'
 
 ClapperEvent = clapper_ns.class_("ClapperEvent", event.Event, cg.Component)
 
+ClapDetectionStateTrigger = clapper_ns.class_(
+    "ClapDetectionStateTrigger",
+    automation.Trigger.template(),
+)
+#TODO: FIX AEGUMENT TYPE ABOVE (and somewhere below)
+
 CONFIG_SCHEMA = event.event_schema(ClapperEvent).extend(
 {
     cv.GenerateID(): cv.declare_id(ClapperEvent),
@@ -35,6 +44,12 @@ CONFIG_SCHEMA = event.event_schema(ClapperEvent).extend(
   cv.Optional(CONF_TRANSIENT_DECAY_THRESHOLD_FACTOR, default=0.25): cv.float_range(min=0.0, max=1.0, min_included=False, max_included=False),
   cv.Optional(CONF_TIME_WINDOW_MIN, default="250ms"): cv.positive_time_period_milliseconds,
   cv.Optional(CONF_TIME_WINDOW_MAX, default="800ms"): cv.positive_time_period_milliseconds,
+
+  cv.Optional(CONF_ON_STATE): automation.validate_automation(
+            {
+                cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(ClapDetectionStateTrigger),
+            }
+        ),
 }
 )
 
@@ -53,3 +68,11 @@ async def to_code(config):
     cg.add(var.set_transient_decay_threshold_factor(config[CONF_TRANSIENT_DECAY_THRESHOLD_FACTOR]))
     cg.add(var.set_time_window_min(config[CONF_TIME_WINDOW_MIN]))
     cg.add(var.set_time_window_max(config[CONF_TIME_WINDOW_MAX]))
+
+    for conf in config.get(CONF_ON_STATE, []):
+        trigger = cg.new_Pvariable(conf[CONF_TRIGGER_ID], var)
+        await automation.build_automation(
+            trigger,
+            [], #[(cg.int16, "state")],
+            conf,
+        )

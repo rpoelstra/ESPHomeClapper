@@ -27,6 +27,9 @@ public:
     void setup() override;
     void loop() override;
 
+    void add_on_clap_detection_state_callback(std::function<void()> &&callback);
+    void update_state(ClapState state);
+
     void set_microphone(microphone::Microphone *mic) { this->mic_ = mic; }
     void set_dc_offset_factor(float factor) { this->dc_offset_factor_ = factor; }
     void set_envelope_decay_factor(float factor) { this->envelope_decay_factor_ = factor; }
@@ -43,6 +46,8 @@ public:
 protected:
     //Component configuration
     microphone::Microphone *mic_{nullptr};
+
+    CallbackManager<void()> state_callback_{};
 
     float dc_offset_factor_;
     float envelope_decay_factor_;

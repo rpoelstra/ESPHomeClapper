@@ -37,6 +37,17 @@ void ClapperEvent::loop() {
     }
 }
 
+void ClapperEvent::add_on_clap_detection_state_callback(std::function<void()> &&callback) {
+  this->state_callback_.add(std::move(callback));
+}
+
+void ClapperEvent::update_state(ClapState state) {
+    if (this->clapState_ != state) {
+        this->clapState_ = state;
+        this->state_callback_.call();
+    }
+}
+
 void ClapperEvent::data_callback(const std::vector<int16_t> &data) {
     unsigned long current_time = millis();
 
@@ -46,23 +57,23 @@ void ClapperEvent::data_callback(const std::vector<int16_t> &data) {
         switch (this->clapState_) {
             case ClapState::IDLE:
                 ESP_LOGI(TAG, "First clap detected!");
-                this->clapState_ = ClapState::FIRST_CLAP;
+                this->update_state(ClapState::FIRST_CLAP);
 //            M5.dis.drawpix(0, CRGB(255, 128, 0));
                 break;
             case ClapState::FIRST_CLAP:
                 if ((current_time - this->last_clap_) < this->time_window_min_) {
                     ESP_LOGI(TAG, "Second clap too early. Reset!");
-                    this->clapState_ = ClapState::IDLE;
+                    this->update_state(ClapState::IDLE);
                 } else {
                     ESP_LOGI(TAG, "Second clap detected!");
-                    this->clapState_ = ClapState::SECOND_CLAP;
+                    this->update_state(ClapState::SECOND_CLAP);
                     //            M5.dis.drawpix(0, CRGB(0, 0, 255));
                     //We do not send event, but wait for not-a-third-clap
                 }
                 break;
             case ClapState::SECOND_CLAP:
                 ESP_LOGI(TAG, "Higher clap detected!");
-                this->clapState_ = ClapState::THIRD_OR_HIGHER_CLAP;
+                this->update_state(ClapState::THIRD_OR_HIGHER_CLAP);
 //            M5.dis.drawpix(0, CRGB(255, 0, 0));
                 break;
             case ClapState::THIRD_OR_HIGHER_CLAP:
@@ -91,7 +102,7 @@ void ClapperEvent::data_callback(const std::vector<int16_t> &data) {
                 break;
         }
 
-        this->clapState_ = ClapState::IDLE;
+        this->update_state(ClapState::IDLE);
     }
 }
 
