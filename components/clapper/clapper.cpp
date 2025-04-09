@@ -37,7 +37,7 @@ void ClapperEvent::loop() {
     }
 }
 
-void ClapperEvent::add_on_clap_detection_state_callback(std::function<void()> &&callback) {
+void ClapperEvent::add_on_clap_detection_state_callback(std::function<void(clapper::ClapState)> &&callback) {
   this->state_callback_.add(std::move(callback));
 }
 
@@ -48,7 +48,7 @@ void ClapperEvent::add_on_double_clap_callback(std::function<void()> &&callback)
 void ClapperEvent::update_state(ClapState state) {
     if (this->clapState_ != state) {
         this->clapState_ = state;
-        this->state_callback_.call();
+        this->state_callback_.call(state);
     }
 }
 

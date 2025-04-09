@@ -28,6 +28,7 @@ CONF_ON_DOUBLE_CLAP = 'on_double_clap'
 
 ClapperEvent = clapper_ns.class_("ClapperEvent", event.Event, cg.Component)
 
+ClapState = clapper_ns.enum("ClapState")
 ClapDetectionStateTrigger = clapper_ns.class_(
     "ClapDetectionStateTrigger",
     automation.Trigger.template(),
@@ -87,7 +88,7 @@ async def to_code(config):
         trigger = cg.new_Pvariable(conf[CONF_TRIGGER_ID], var)
         await automation.build_automation(
             trigger,
-            [], #[(cg.int16, "state")],
+            [(ClapState, "state")],
             conf,
         )
 
@@ -95,6 +96,6 @@ async def to_code(config):
         trigger = cg.new_Pvariable(conf[CONF_TRIGGER_ID], var)
         await automation.build_automation(
             trigger,
-            [], #[(cg.int16, "state")],
+            [],
             conf,
         )

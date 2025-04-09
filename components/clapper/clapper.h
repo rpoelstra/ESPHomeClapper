@@ -27,7 +27,7 @@ public:
     void setup() override;
     void loop() override;
 
-    void add_on_clap_detection_state_callback(std::function<void()> &&callback);
+    void add_on_clap_detection_state_callback(std::function<void(clapper::ClapState)> &&callback);
     void add_on_double_clap_callback(std::function<void()> &&callback);
     void update_state(ClapState state);
 
@@ -48,7 +48,7 @@ protected:
     //Component configuration
     microphone::Microphone *mic_{nullptr};
 
-    CallbackManager<void()> state_callback_{};
+    CallbackManager<void(clapper::ClapState)> state_callback_{};
     CallbackManager<void()> double_clap_callback_{};
 
     float dc_offset_factor_;

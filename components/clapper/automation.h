@@ -6,10 +6,10 @@
 namespace esphome {
 namespace clapper {
 
-class ClapDetectionStateTrigger : public Trigger<> {
+class ClapDetectionStateTrigger : public Trigger<ClapState> {
  public:
   explicit ClapDetectionStateTrigger(ClapperEvent *clapper) {
-    clapper->add_on_clap_detection_state_callback([this]() { this->trigger(); });
+    clapper->add_on_clap_detection_state_callback([this](ClapState state) { this->trigger(state); });
   }
 };
 
