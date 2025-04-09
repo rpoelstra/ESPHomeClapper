@@ -13,5 +13,12 @@ class ClapDetectionStateTrigger : public Trigger<> {
   }
 };
 
+class DoubleClapTrigger: public Trigger<> {
+public:
+ explicit DoubleClapTrigger(ClapperEvent *clapper) {
+   clapper->add_on_double_clap_callback([this]() { this->trigger(); });
+ }
+};
+
 }  // namespace clapper
 }  // namespace esphome

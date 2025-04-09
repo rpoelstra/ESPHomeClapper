@@ -24,6 +24,8 @@ CONF_TRANSIENT_DECAY_THRESHOLD_FACTOR = 'transient_decay_threshold_factor'
 CONF_TIME_WINDOW_MIN = 'minimum_time_window'
 CONF_TIME_WINDOW_MAX = 'maximum_time_window'
 
+CONF_ON_DOUBLE_CLAP = 'on_double_clap'
+
 ClapperEvent = clapper_ns.class_("ClapperEvent", event.Event, cg.Component)
 
 ClapDetectionStateTrigger = clapper_ns.class_(
@@ -31,6 +33,11 @@ ClapDetectionStateTrigger = clapper_ns.class_(
     automation.Trigger.template(),
 )
 #TODO: FIX AEGUMENT TYPE ABOVE (and somewhere below)
+
+DoubleClapTrigger = clapper_ns.class_(
+    "DoubleClapTrigger",
+    automation.Trigger.template(),
+)
 
 CONFIG_SCHEMA = event.event_schema(ClapperEvent).extend(
 {
@@ -50,6 +57,13 @@ CONFIG_SCHEMA = event.event_schema(ClapperEvent).extend(
                 cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(ClapDetectionStateTrigger),
             }
         ),
+
+  cv.Optional(CONF_ON_DOUBLE_CLAP): automation.validate_automation(
+            {
+                cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(DoubleClapTrigger),
+            }
+        ),
+
 }
 )
 
@@ -70,6 +84,14 @@ async def to_code(config):
     cg.add(var.set_time_window_max(config[CONF_TIME_WINDOW_MAX]))
 
     for conf in config.get(CONF_ON_STATE, []):
+        trigger = cg.new_Pvariable(conf[CONF_TRIGGER_ID], var)
+        await automation.build_automation(
+            trigger,
+            [], #[(cg.int16, "state")],
+            conf,
+        )
+
+    for conf in config.get(CONF_ON_DOUBLE_CLAP, []):
         trigger = cg.new_Pvariable(conf[CONF_TRIGGER_ID], var)
         await automation.build_automation(
             trigger,

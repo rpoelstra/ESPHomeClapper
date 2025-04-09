@@ -41,6 +41,10 @@ void ClapperEvent::add_on_clap_detection_state_callback(std::function<void()> &&
   this->state_callback_.add(std::move(callback));
 }
 
+void ClapperEvent::add_on_double_clap_callback(std::function<void()> &&callback) {
+    this->double_clap_callback_.add(std::move(callback));
+}
+
 void ClapperEvent::update_state(ClapState state) {
     if (this->clapState_ != state) {
         this->clapState_ = state;
@@ -94,6 +98,7 @@ void ClapperEvent::data_callback(const std::vector<int16_t> &data) {
             case ClapState::SECOND_CLAP:
                 ESP_LOGI(TAG, "Double clap accepted!");
                 this->double_clap_accepted_ = true;
+                this->double_clap_callback_.call();
                 //            M5.dis.drawpix(0, CRGB(0, 255, 0));
                 break;
             case ClapState::THIRD_OR_HIGHER_CLAP:
