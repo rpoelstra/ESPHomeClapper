@@ -56,6 +56,28 @@ In the automation editor in Home Assistant select 'Entity' as automation trigger
 - **minimum_time_window** (_Optional_): The minimum time between claps for them to be considered a grouped event. Defaults to 250 ms.
 - **maximum_time_window** (_Optional_): The maximum time between claps for them to be considered a grouped event. Defaults to 500 ms.
 
+## Triggers
+- **on_double_clap** (_Optional_): This trigger is activated when a double clap is detected.
+- **on_state** (_Optional_): This trigger is activated on every state change of the internal algorithm. It can be used to control a LED to show whether a clap is accepted or when there are too many claps. It's mainly usefull for debugging. The `state` variable can be used to read out the current state, which can take the following values:
+    - clapper::ClapState::IDLE
+    - clapper::ClapState::FIRST_CLAP
+    - clapper::ClapState::SECOND_CLAP
+    - clapper::ClapState::THIRD_OR_HIGHER_CLAP
+    ```
+    event:
+    - platform: clapper
+      name: My Clapper
+      on_state:
+        then:
+            - if:
+                condition:
+                    lambda: return state == clapper::ClapState::IDLE;
+                then:
+                    - light.turn_off: led #Note that the 'led' light must be defined somehwhere in the YAML file
+                else:
+                    - light.turn_on: led                    
+    ```
+
 ## Full example
 
 The following YAML is a full configuration example for the M5Stack Atom Echo:
