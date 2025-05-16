@@ -2,15 +2,17 @@
 #include "esphome/core/hal.h"
 #include "clapper.h"
 
+#ifdef USE_ESP32
+
 namespace esphome {
 namespace clapper {
 
-static const char *TAG = "clapper.component";
+static const char *TAG = "clapper";
 
 
 void ClapperEvent::setup() {
     ESP_LOGI(TAG, "Clapper setup");
-    this->mic_->add_data_callback([this](const std::vector<int16_t> &data) {
+    this->mic_source_->add_data_callback([this](const std::vector<uint8_t> &data) {
         this->data_callback(data);
     });
 }
@@ -19,11 +21,11 @@ void ClapperEvent::loop() {
     switch (this->state_) {
         case State::START_MICROPHONE:
             ESP_LOGD(TAG, "Starting Microphone");
-            this->mic_->start();
+            this->mic_source_->start();
             this->state_ = State::STARTING_MICROPHONE;
             break;
         case State::STARTING_MICROPHONE:
-            if (this->mic_->is_running()) {
+            if (this->mic_source_->is_running()) {
                 ESP_LOGD(TAG, "Microphone started");
                 this->state_ = State::RUNNING;
             }
@@ -52,11 +54,12 @@ void ClapperEvent::update_state(ClapState state) {
     }
 }
 
-void ClapperEvent::data_callback(const std::vector<int16_t> &data) {
+void ClapperEvent::data_callback(const std::vector<uint8_t> &data) {
     unsigned long current_time = millis();
+    std::vector<int16_t> samples((int16_t *)data.data(),(int16_t *)(data.data()+data.size()));
 
     //Detect double claps
-    if (this->detect_clap(data)) {
+    if (this->detect_clap(samples)) {
         //A clap was detected
         switch (this->clapState_) {
             case ClapState::IDLE:
@@ -164,3 +167,4 @@ bool ClapperEvent::detect_clap(const std::vector<int16_t> &data) {
 
 }  // namespace empty_component
 }  // namespace esphome
+#endif
