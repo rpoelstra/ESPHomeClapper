@@ -113,12 +113,6 @@ bool ClapperEvent::detect_clap(const std::vector<int16_t> &data) {
     bool clap_detected = false;
 
     for(int16_t sample : data) {
-        //Update DC offset estimation
-        this->dc_offset_ = this->dc_offset_factor_ * this->dc_offset_ + (1-this->dc_offset_factor_)*sample;
-
-        //Remove DC offset
-        sample = clamp(sample-this->dc_offset_, (float)-INT16_MAX, (float)INT16_MAX);
-
         //Take absolute value
         sample = abs(sample);
 

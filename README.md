@@ -45,7 +45,6 @@ In the automation editor in Home Assistant select 'Entity' as automation trigger
 
 ## Configuration variables
 
-- **dc_offset_factor** (_Optional_): Factor that controls how fast the system will respond to changes in the DC offset of the signal. Should be very close to 1. Defaults to 0.9999. 
 - **envelope_decay_factor** (_Optional_): Factor that controls how fast the system decays after a signal peak. Should be close to 1. Defaults to 0.999.
 - **onset_threshold** (_Optional_): Minimum signal input required for an onset to be detected. Defaults to 1000.
 - **onset_ratio_threshold** (_Optional_): Ratio between two consequtive samples that will be required for the onset to be marked as such. Defaults to 1.58.
@@ -113,6 +112,7 @@ microphone:
     adc_type: external
     bits_per_sample: 16bit
     pdm: true
+    correct_dc_offset: true
 
 event:
     - platform: clapper
@@ -184,9 +184,9 @@ Running the script should result in the following plot:
 
 The top graph shows the input waveform and the graphs below that show various stages of the algorithm. We will explain these as we discuss the configuration parameters.
 
-#### dc_offset_factor
+#### DC offset factor
 
-Notice that the input signal various from about 1000 to 1500. This indicates that there is a significant DC offset present in the sginal. The first configuration parameter controls how fast this DC offset is removed. Notice that the second graph shows a decaying waveform from 0 s to about 1.5 s. The slope of this is control by the `dc_offset_factor`, where a larger number results in lighter slope.
+Notice that the input signal various from about 1000 to 1500. This indicates that there is a significant DC offset present in the sginal. Although this is not a configuration variable from clapper but rather from the i2s_microphone component, it's very important for the rest of the algorithm that this DC offset is removed. So, if your microphone also shows this DC offset, please enable the `correct_dc_offset: true` configuration for the `i2s_microphone`.
 
 This second graph also shows the resulting waveform when the absolute value is taken. This is important for the next step, where the envelope is calculated.
 
