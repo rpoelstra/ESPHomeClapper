@@ -13,7 +13,7 @@ Add the following to your YAML file to make use of ESPHomeClapper. Make sure to 
 
 ```
 esphome:
-  min_version: 2024.7.1
+  min_version: 2025.5.0b2
 
 esp32:
   framework:
@@ -22,8 +22,6 @@ esp32:
 external_components:
   - source: github://rpoelstra/ESPHomeClapper@main
     components: [ clapper ]
-  - source: github://pr#8181
-    components: [ i2s_audio, microphone ]
 
 i2s_audio:
   - i2s_lrclk_pin: GPIO33
@@ -84,7 +82,7 @@ The following YAML is a full configuration example for the M5Stack Atom Echo:
 ```
 esphome:
   name: clapper
-  min_version: 2024.7.1
+  min_version: 2025.5.0b2
 
 esp32:
   board: m5stack-atom
@@ -104,8 +102,6 @@ wifi:
 external_components:
   - source: github://rpoelstra/ESPHomeClapper@main
     components: [ clapper ]
-  - source: github://pr#8181
-    components: [ i2s_audio, microphone ]
 
 i2s_audio:
   - i2s_lrclk_pin: GPIO33
