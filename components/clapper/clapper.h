@@ -1,8 +1,10 @@
 #pragma once
 
+#ifdef USE_ESP32
+
 #include "esphome/core/component.h"
 #include "esphome/components/event/event.h"
-#include "esphome/components/microphone/microphone.h"
+#include "esphome/components/microphone/microphone_source.h"
 
 #include <vector>
 
@@ -29,9 +31,8 @@ public:
 
     void add_on_clap_detection_state_callback(std::function<void(clapper::ClapState)> &&callback);
     void add_on_double_clap_callback(std::function<void()> &&callback);
-    void update_state(ClapState state);
 
-    void set_microphone(microphone::Microphone *mic) { this->mic_ = mic; }
+    void set_microphone_source(microphone::MicrophoneSource *mic_source) { this->mic_source_ = mic_source; }
     void set_dc_offset_factor(float factor) { this->dc_offset_factor_ = factor; }
     void set_envelope_decay_factor(float factor) { this->envelope_decay_factor_ = factor; }
     void set_onset_threshold(int16_t threshold) { this->onset_threshold_ = threshold; }
@@ -42,11 +43,12 @@ public:
     void set_time_window_min(int window) { this->time_window_min_ = window; }
     void set_time_window_max(int window) { this->time_window_max_ = window; }
 
-    void data_callback(const std::vector<int16_t> &data);
-
 protected:
     //Component configuration
-    microphone::Microphone *mic_{nullptr};
+    microphone::MicrophoneSource *mic_source_{nullptr};
+    void data_callback(const std::vector<uint8_t> &data);
+
+    void update_state(ClapState state);
 
     CallbackManager<void(clapper::ClapState)> state_callback_{};
     CallbackManager<void()> double_clap_callback_{};
@@ -80,3 +82,4 @@ protected:
 
 }  // namespace clapper
 }  // namespace esphome
+#endif
