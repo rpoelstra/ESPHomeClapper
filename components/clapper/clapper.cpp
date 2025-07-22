@@ -15,27 +15,14 @@ void ClapperEvent::setup() {
     this->mic_source_->add_data_callback([this](const std::vector<uint8_t> &data) {
         this->data_callback(data);
     });
+
+    this->mic_source_->start();
 }
 
 void ClapperEvent::loop() {
-    switch (this->state_) {
-        case State::START_MICROPHONE:
-            ESP_LOGD(TAG, "Starting Microphone");
-            this->mic_source_->start();
-            this->state_ = State::STARTING_MICROPHONE;
-            break;
-        case State::STARTING_MICROPHONE:
-            if (this->mic_source_->is_running()) {
-                ESP_LOGD(TAG, "Microphone started");
-                this->state_ = State::RUNNING;
-            }
-            break;
-        case State::RUNNING:
-            if (this->double_clap_accepted_) {
-                this->double_clap_accepted_ = false;
-                this->trigger("double_clap");
-            }
-            break;
+    if (this->double_clap_accepted_) {
+        this->double_clap_accepted_ = false;
+        this->trigger("double_clap");
     }
 }
 

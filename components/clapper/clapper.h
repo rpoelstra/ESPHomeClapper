@@ -11,12 +11,6 @@
 namespace esphome {
 namespace clapper {
 
-enum class State {
-    START_MICROPHONE,
-    STARTING_MICROPHONE,
-    RUNNING,
-};
-
 enum class ClapState {
     IDLE,
     FIRST_CLAP,
@@ -60,9 +54,6 @@ protected:
 
     unsigned long time_window_min_;
     unsigned long time_window_max_;
-
-    //Component state
-    State state_ {State::START_MICROPHONE};
 
     int16_t envelope_ = 0;
     int16_t previous_envelope_ = 0;
