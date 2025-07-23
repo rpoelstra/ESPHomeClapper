@@ -7,6 +7,7 @@ from esphome.const import (
     CONF_MICROPHONE,
     CONF_ON_STATE,
     CONF_TRIGGER_ID,
+    PLATFORM_ESP32,
 )
 
 from . import clapper_ns
@@ -44,36 +45,40 @@ DoubleClapTrigger = clapper_ns.class_(
 StartAction = clapper_ns.class_("StartAction", automation.Action)
 StopAction = clapper_ns.class_("StopAction", automation.Action)
 
-CONFIG_SCHEMA = event.event_schema(ClapperEvent).extend(
-{
-    cv.GenerateID(): cv.declare_id(ClapperEvent),
-    cv.Optional(CONF_MICROPHONE, default = {}): microphone.microphone_source_schema(
-        min_bits_per_sample=16,
-        max_bits_per_sample=16,
+CONFIG_SCHEMA = cv.All(
+    event.event_schema(ClapperEvent).extend(
+    {
+        cv.GenerateID(): cv.declare_id(ClapperEvent),
+        cv.Optional(CONF_MICROPHONE, default = {}): microphone.microphone_source_schema(
+            min_bits_per_sample=16,
+            max_bits_per_sample=16,
+        ),
+        cv.Optional(CONF_PASSIVE, default = False): cv.boolean,
+
+        cv.Optional(CONF_ENVELOPE_DECAY_FACTOR, default=0.999):  cv.float_range(min=0.0, max=1.0, min_included=False, max_included=False),
+        cv.Optional(CONF_ONSET_THRESHOLD, default=1000): cv.int_, #TODO: Add range
+        cv.Optional(CONF_ONSET_RATIO_THRESHOLD, default=1.58): cv.float_range(min=1.0, min_included=False),
+        cv.Optional(CONF_TRANSIENT_TIMEOUT, default="100ms"): cv.positive_time_period_milliseconds,
+        cv.Optional(CONF_TRANSIENT_DECAY_THRESHOLD_FACTOR, default=0.25): cv.float_range(min=0.0, max=1.0, min_included=False, max_included=False),
+        cv.Optional(CONF_TIME_WINDOW_MIN, default="250ms"): cv.positive_time_period_milliseconds,
+        cv.Optional(CONF_TIME_WINDOW_MAX, default="800ms"): cv.positive_time_period_milliseconds,
+
+        cv.Optional(CONF_ON_STATE): automation.validate_automation(
+                {
+                    cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(ClapDetectionStateTrigger),
+                }
+            ),
+
+        cv.Optional(CONF_ON_DOUBLE_CLAP): automation.validate_automation(
+                {
+                    cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(DoubleClapTrigger),
+                }
+            ),
+    }
     ),
-    cv.Optional(CONF_PASSIVE, default = False): cv.boolean,
-
-    cv.Optional(CONF_ENVELOPE_DECAY_FACTOR, default=0.999):  cv.float_range(min=0.0, max=1.0, min_included=False, max_included=False),
-    cv.Optional(CONF_ONSET_THRESHOLD, default=1000): cv.int_, #TODO: Add range
-    cv.Optional(CONF_ONSET_RATIO_THRESHOLD, default=1.58): cv.float_range(min=1.0, min_included=False),
-    cv.Optional(CONF_TRANSIENT_TIMEOUT, default="100ms"): cv.positive_time_period_milliseconds,
-    cv.Optional(CONF_TRANSIENT_DECAY_THRESHOLD_FACTOR, default=0.25): cv.float_range(min=0.0, max=1.0, min_included=False, max_included=False),
-    cv.Optional(CONF_TIME_WINDOW_MIN, default="250ms"): cv.positive_time_period_milliseconds,
-    cv.Optional(CONF_TIME_WINDOW_MAX, default="800ms"): cv.positive_time_period_milliseconds,
-
-    cv.Optional(CONF_ON_STATE): automation.validate_automation(
-            {
-                cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(ClapDetectionStateTrigger),
-            }
-        ),
-
-    cv.Optional(CONF_ON_DOUBLE_CLAP): automation.validate_automation(
-            {
-                cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(DoubleClapTrigger),
-            }
-        ),
-}
+    cv.only_on([PLATFORM_ESP32])
 )
+
 
 async def to_code(config):
     var = await event.new_event(config, event_types=["double_clap"])
