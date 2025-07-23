@@ -10,6 +10,10 @@ namespace clapper {
 static const char *TAG = "clapper";
 
 
+void ClapperEvent::dump_config() {
+  LOG_EVENT("  ", "Clapper", this);
+}
+
 void ClapperEvent::setup() {
     ESP_LOGI(TAG, "Clapper setup");
     this->mic_source_->add_data_callback([this](const std::vector<uint8_t> &data) {

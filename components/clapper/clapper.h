@@ -21,6 +21,7 @@ enum class ClapState {
 
 class ClapperEvent : public Component, public event::Event {
 public:
+    void dump_config() override;
     void setup() override;
     void loop() override;
 
