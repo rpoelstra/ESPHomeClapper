@@ -3,6 +3,7 @@
 #ifdef USE_ESP32
 
 #include "esphome/core/component.h"
+#include "esphome/core/automation.h"
 #include "esphome/components/event/event.h"
 #include "esphome/components/microphone/microphone_source.h"
 
@@ -36,6 +37,12 @@ public:
     void set_time_window_min(int window) { this->time_window_min_ = window; }
     void set_time_window_max(int window) { this->time_window_max_ = window; }
 
+    /// @brief Starts the MicrophoneSource to start detecting claps
+    void start();
+
+    /// @brief Stops the MicrophoneSource
+    void stop();
+
 protected:
     //Component configuration
     microphone::MicrophoneSource *mic_source_{nullptr};
@@ -65,6 +72,16 @@ protected:
     unsigned long last_clap_ = 0;
 
     bool detect_clap(const std::vector<int16_t> &data);
+};
+
+template<typename... Ts> class StartAction : public Action<Ts...>, public Parented<ClapperEvent> {
+public:
+    void play(Ts... x) override { this->parent_->start(); }
+};
+
+template<typename... Ts> class StopAction : public Action<Ts...>, public Parented<ClapperEvent> {
+public:
+    void play(Ts... x) override { this->parent_->stop(); }
 };
 
 

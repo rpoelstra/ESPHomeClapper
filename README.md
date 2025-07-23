@@ -45,6 +45,8 @@ In the automation editor in Home Assistant select 'Entity' as automation trigger
 
 ## Configuration variables
 
+- **passive** (**Optional**, boolean). Whether passive mode is enabled. See `Passive Mode` below. Defaults to false.
+
 - **envelope_decay_factor** (_Optional_): Factor that controls how fast the system decays after a signal peak. Should be close to 1. Defaults to 0.999.
 - **onset_threshold** (_Optional_): Minimum signal input required for an onset to be detected. Defaults to 1000.
 - **onset_ratio_threshold** (_Optional_): Ratio between two consequtive samples that will be required for the onset to be marked as such. Defaults to 1.58.
@@ -54,6 +56,7 @@ In the automation editor in Home Assistant select 'Entity' as automation trigger
 - **maximum_time_window** (_Optional_): The maximum time between claps for them to be considered a grouped event. Defaults to 500 ms.
 
 ## Triggers
+
 - **on_double_clap** (_Optional_): This trigger is activated when a double clap is detected.
 - **on_state** (_Optional_): This trigger is activated on every state change of the internal algorithm. It can be used to control a LED to show whether a clap is accepted or when there are too many claps. It's mainly usefull for debugging. The `state` variable can be used to read out the current state, which can take the following values:
     - clapper::ClapState::IDLE
@@ -74,6 +77,18 @@ In the automation editor in Home Assistant select 'Entity' as automation trigger
                 else:
                     - light.turn_on: led                    
     ```
+
+## Actions
+
+The following actions are available for use in automations:
+
+``clapper.start`` Action
+
+Starts detecting claps. Does nothing in passive mode.
+
+``clapper.stop`` Action
+
+Stops detecting claps. Does nothing in passive mode.
 
 ## Full example
 
@@ -117,6 +132,17 @@ microphone:
 event:
     - platform: clapper
       name: My Clapper
+```
+
+
+## Passive Mode
+
+If the clapper event component is configured in passive mode, then it will only detect claps when another ESPHome component is capturing audio from the microphone. If disabled, then you must manually start and stop capturing using actions. When passive mode is disabled, it will automatically start the microphone when the component sets up.
+
+```
+Some devices do not support duplex audio, meaning they cannot output audio to a speaker at the same time as capturing audio from a microphone.
+On these devices, with passive mode disabled, you must take care to manually stop the ``clapper`` component whenever you want to send audio to the speaker component.
+No manual management is necessary if you enable passive mode.
 ```
 
 ## Tweaking the configuration variables

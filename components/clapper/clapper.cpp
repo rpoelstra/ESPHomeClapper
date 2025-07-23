@@ -16,7 +16,10 @@ void ClapperEvent::setup() {
         this->data_callback(data);
     });
 
-    this->mic_source_->start();
+    if (!this->mic_source_->is_passive()) {
+        // Automatically start the microphone if not in passive mode
+        this->mic_source_->start();
+    }
 }
 
 void ClapperEvent::loop() {
@@ -24,6 +27,22 @@ void ClapperEvent::loop() {
         this->double_clap_accepted_ = false;
         this->trigger("double_clap");
     }
+}
+
+void ClapperEvent::start() {
+  if (this->mic_source_->is_passive()) {
+    ESP_LOGW(TAG, "Can't start the microphone in passive mode");
+    return;
+  }
+  this->mic_source_->start();
+}
+
+void ClapperEvent::stop() {
+  if (this->mic_source_->is_passive()) {
+    ESP_LOGW(TAG, "Can't stop microphone in passive mode");
+    return;
+  }
+  this->mic_source_->stop();
 }
 
 void ClapperEvent::add_on_clap_detection_state_callback(std::function<void(clapper::ClapState)> &&callback) {

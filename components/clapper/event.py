@@ -14,6 +14,8 @@ from . import clapper_ns
 DEPENDENCIES = ["microphone"]
 CODEOWNERS = ["@rpoelstra"]
 
+CONF_PASSIVE = "passive"
+
 CONF_ENVELOPE_DECAY_FACTOR = 'envelope_decay_factor'
 CONF_ONSET_THRESHOLD = 'onset_threshold'
 CONF_ONSET_RATIO_THRESHOLD = 'onset_ratio_threshold'
@@ -39,6 +41,9 @@ DoubleClapTrigger = clapper_ns.class_(
     automation.Trigger.template(),
 )
 
+StartAction = clapper_ns.class_("StartAction", automation.Action)
+StopAction = clapper_ns.class_("StopAction", automation.Action)
+
 CONFIG_SCHEMA = event.event_schema(ClapperEvent).extend(
 {
     cv.GenerateID(): cv.declare_id(ClapperEvent),
@@ -46,6 +51,8 @@ CONFIG_SCHEMA = event.event_schema(ClapperEvent).extend(
         min_bits_per_sample=16,
         max_bits_per_sample=16,
     ),
+    cv.Optional(CONF_PASSIVE, default = False): cv.boolean,
+
     cv.Optional(CONF_ENVELOPE_DECAY_FACTOR, default=0.999):  cv.float_range(min=0.0, max=1.0, min_included=False, max_included=False),
     cv.Optional(CONF_ONSET_THRESHOLD, default=1000): cv.int_, #TODO: Add range
     cv.Optional(CONF_ONSET_RATIO_THRESHOLD, default=1.58): cv.float_range(min=1.0, min_included=False),
@@ -73,7 +80,7 @@ async def to_code(config):
     await cg.register_component(var, config)
 
     mic_source = await microphone.microphone_source_to_code(
-        config[CONF_MICROPHONE], passive = False
+        config[CONF_MICROPHONE], passive = config[CONF_PASSIVE]
     )
     cg.add(var.set_microphone_source(mic_source))
 
@@ -100,3 +107,17 @@ async def to_code(config):
             [],
             conf,
         )
+
+CLAPPER_ACTION_SCHEMA = automation.maybe_simple_id(
+    {
+        cv.GenerateID(): cv.use_id(ClapperEvent),
+    }
+)
+
+
+@automation.register_action("clapper.start", StartAction, CLAPPER_ACTION_SCHEMA)
+@automation.register_action("clapper.stop", StopAction, CLAPPER_ACTION_SCHEMA)
+async def clapper_action_to_code(config, action_id, template_arg, args):
+    var = cg.new_Pvariable(action_id, template_arg)
+    await cg.register_parented(var, config[CONF_ID])
+    return var
